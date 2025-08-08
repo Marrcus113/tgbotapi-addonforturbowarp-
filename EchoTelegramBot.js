@@ -4,10 +4,9 @@
   class EchoTelegramBot {
     constructor() {
       this.token = '';
-      this.aiToken = '';
       this.lastUpdateId = 0;
       this.lastMessage = '';
-      this.mode = 'repeat'; // режим по умолчанию
+      this.mode = 'repeat';
     }
 
     getInfo() {
@@ -23,17 +22,6 @@
               TOKEN: {
                 type: Scratch.ArgumentType.STRING,
                 defaultValue: '123456789:ABCdefGhIJKlmNoPQRstuVWxyZ12345678'
-              }
-            }
-          },
-          {
-            opcode: 'setAiToken',
-            blockType: Scratch.BlockType.COMMAND,
-            text: 'установить AI токен [AITOKEN]',
-            arguments: {
-              AITOKEN: {
-                type: Scratch.ArgumentType.STRING,
-                defaultValue: 'aiml_xxx'
               }
             }
           },
@@ -55,10 +43,6 @@
       this.token = args.TOKEN;
     }
 
-    setAiToken(args) {
-      this.aiToken = args.AITOKEN;
-    }
-
     async updateMessages(args, util) {
       if (!this.token) return;
 
@@ -71,49 +55,19 @@
           const text = update.message.text;
           this.lastUpdateId = update.update_id;
 
-          // Сохраняем последнее сообщение
           this.lastMessage = text;
 
           let reply = '';
 
-          // Переключение режима
-          if (text === '/ai') {
-            this.mode = 'ai';
-            reply = 'Режим переключён: ИИ';
-          } else if (text === '/textrepeat') {
+          if (text === '/textrepeat') {
             this.mode = 'repeat';
-            reply = 'Режим переключён: Повтор текста';
+            reply = 'Режим: Повтор текста';
+          } else if (text === '/developersite') {
+            reply = 'Официальный сайт разработчика: https://promem.shop';
           } else {
-            // Ответ в зависимости от режима
-            if (this.mode === 'ai') {
-              if (!this.aiToken) {
-                reply = 'AI токен не установлен.';
-              } else {
-                try {
-                  const aiResponse = await fetch('https://api.aimlapi.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                      'Authorization': `Bearer ${this.aiToken}`,
-                      'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                      messages: [
-                        { role: 'user', content: text }
-                      ]
-                    })
-                  }).then(res => res.json());
-
-                  reply = aiResponse.choices?.[0]?.message?.content || 'Не удалось получить ответ от ИИ.';
-                } catch (e) {
-                  reply = 'Ошибка при обращении к AI.';
-                }
-              }
-            } else {
-              reply = text;
-            }
+            reply = text;
           }
 
-          // Отправка ответа в Telegram
           await fetch(`https://api.telegram.org/bot${this.token}/sendMessage`, {
             method: 'POST',
             headers: {
