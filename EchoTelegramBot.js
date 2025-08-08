@@ -20,19 +20,19 @@
             arguments: {
               TOKEN: {
                 type: Scratch.ArgumentType.STRING,
-                defaultValue: 'вставь_токен_сюда'
+                defaultValue: '123456789:ABCdefGhIJKlmNoPQRstuVWxyZ12345678'
               }
             }
-          },
-          {
-            opcode: 'getLastMessage',
-            blockType: Scratch.BlockType.REPORTER,
-            text: 'последнее сообщение'
           },
           {
             opcode: 'updateMessages',
             blockType: Scratch.BlockType.COMMAND,
             text: 'обновить сообщения'
+          },
+          {
+            opcode: 'getLastMessage',
+            blockType: Scratch.BlockType.REPORTER,
+            text: 'последнее сообщение'
           }
         ]
       };
@@ -42,14 +42,10 @@
       this.token = args.TOKEN;
     }
 
-    getLastMessage() {
-      return this.lastMessage;
-    }
-
-    updateMessages() {
+    updateMessages(args, util) {
       if (!this.token) return;
 
-      fetch(`https://api.telegram.org/bot${this.token}/getUpdates?offset=${this.lastUpdateId + 1}`)
+      return fetch(`https://api.telegram.org/bot${this.token}/getUpdates?offset=${this.lastUpdateId + 1}`)
         .then(response => response.json())
         .then(data => {
           if (data.result.length > 0) {
@@ -73,6 +69,10 @@
             }
           }
         });
+    }
+
+    getLastMessage() {
+      return this.lastMessage || '';
     }
   }
 
