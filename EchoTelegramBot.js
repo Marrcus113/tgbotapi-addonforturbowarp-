@@ -53,6 +53,12 @@
               const chatId = update.message.chat.id;
               const text = update.message.text;
 
+              // ⛔ Пропустить команды, начинающиеся с "/"
+              if (text.startsWith('/')) {
+                this.lastUpdateId = update.update_id;
+                continue;
+              }
+
               this.lastMessage = text;
               this.lastUpdateId = update.update_id;
 
