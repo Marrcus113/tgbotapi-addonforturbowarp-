@@ -5,6 +5,7 @@
     constructor() {
       this.token = '';
       this.lastUpdateId = 0;
+      this.lastMessage = '';
     }
 
     getInfo() {
@@ -24,9 +25,14 @@
             }
           },
           {
-            opcode: 'checkMessages',
+            opcode: 'getLastMessage',
+            blockType: Scratch.BlockType.REPORTER,
+            text: 'последнее сообщение'
+          },
+          {
+            opcode: 'updateMessages',
             blockType: Scratch.BlockType.COMMAND,
-            text: 'проверить сообщения'
+            text: 'обновить сообщения'
           }
         ]
       };
@@ -36,32 +42,37 @@
       this.token = args.TOKEN;
     }
 
-    async checkMessages() {
+    getLastMessage() {
+      return this.lastMessage;
+    }
+
+    updateMessages() {
       if (!this.token) return;
 
-      const url = `https://api.telegram.org/bot${this.token}/getUpdates?offset=${this.lastUpdateId + 1}`;
-      const response = await fetch(url);
-      const data = await response.json();
+      fetch(`https://api.telegram.org/bot${this.token}/getUpdates?offset=${this.lastUpdateId + 1}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.result.length > 0) {
+            for (const update of data.result) {
+              const chatId = update.message.chat.id;
+              const text = update.message.text;
 
-      if (data.result.length > 0) {
-        for (const update of data.result) {
-          const chatId = update.message.chat.id;
-          const text = update.message.text;
+              this.lastMessage = text;
+              this.lastUpdateId = update.update_id;
 
-          await fetch(`https://api.telegram.org/bot${this.token}/sendMessage`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              chat_id: chatId,
-              text: `Ты сказал: ${text}`
-            })
-          });
-
-          this.lastUpdateId = update.update_id;
-        }
-      }
+              fetch(`https://api.telegram.org/bot${this.token}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  chat_id: chatId,
+                  text: `Ты сказал: ${text}`
+                })
+              });
+            }
+          }
+        });
     }
   }
 
