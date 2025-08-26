@@ -58,10 +58,6 @@
           this.lastMessage = text;
 
           let reply = '';
-
-          if (text === '/textrepeat') {
-            this.mode = 'repeat';
-            reply = 'Режим: Повтор текста';
           } else if (text === '/developersite') {
             reply = 'Официальный сайт разработчика: https://promem.shop';
           } else {
@@ -89,3 +85,4 @@
 
   Scratch.extensions.register(new EchoTelegramBot());
 })(Scratch);
+
