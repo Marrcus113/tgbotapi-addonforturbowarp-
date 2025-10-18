@@ -1,3 +1,4 @@
+// не работает
 (function(Scratch) {
   'use strict';
 
@@ -85,4 +86,5 @@
 
   Scratch.extensions.register(new EchoTelegramBot());
 })(Scratch);
+
 
